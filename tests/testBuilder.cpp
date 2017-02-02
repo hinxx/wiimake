@@ -100,6 +100,7 @@ TEST_CASE("allocate sections given object files")
     args.sources.push_back(prefix + "source/source2.c");
     args.libs.push_back(prefix + "lib1.a");
     args.includePaths.push_back(prefix + "include");
+    args.entry = "_main";
     args.injectAddress = 0x80377998;
     args.originalInstruction = 0x7ee3bb78;
     args.memRegions.push_back(MemRegion(0x803fa3e8, 0x803fc2ec));
@@ -108,7 +109,7 @@ TEST_CASE("allocate sections given object files")
     args.memRegions.push_back(MemRegion(0x803001dc, 0x80301e40));
 
     /* compile source files, return object files */
-    auto objects = Builder::getObjectFiles(args.sources, 
+    auto objects = Builder::getObjectFiles(args.sources, TokenList(), 
         args.includePaths, args.libs);
     
     REQUIRE(objects.size() == 3);    
@@ -185,13 +186,14 @@ TEST_CASE("link sections and extract code")
     args.includePaths.push_back(prefix + "include");
     args.injectAddress = 0x80377998;
     args.originalInstruction = 0x7ee3bb78;
+    args.entry = "_main";
     args.memRegions.push_back(MemRegion(0x803fa3e8, 0x803fc2ec));
     args.memRegions.push_back(MemRegion(0x803fc420, 0x803fdc1c));
     args.memRegions.push_back(MemRegion(0x801910e0, 0x80192930));
     args.memRegions.push_back(MemRegion(0x803001dc, 0x80301e40));
 
     /* compile source files, return object files */
-    auto objects = Builder::getObjectFiles(args.sources, 
+    auto objects = Builder::getObjectFiles(args.sources, TokenList(),
         args.includePaths, args.libs);
 
     /* find addresses for each section */
@@ -202,7 +204,7 @@ TEST_CASE("link sections and extract code")
 
     /* link all code in sections */
     System::runCMD(System::rm + " final.out");
-    ASMcode code = Builder::getLinkedCode(sections);
+    ASMcode code = Builder::getLinkedCode(sections, args);
 
     REQUIRE(code.size() == 244);
 
@@ -222,7 +224,7 @@ TEST_CASE("link sections and extract code")
     REQUIRE(code[180].second == 0xc8080208);
 
     REQUIRE(code[243].first == 0x80377998);
-    REQUIRE(code[243].second == 0x48082a51);
+    REQUIRE(code[243].second == 0x48082a50);
 
     Builder::cleanDirectory();
 }

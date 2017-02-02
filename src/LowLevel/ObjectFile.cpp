@@ -75,20 +75,22 @@ ASMcode ObjectFile::extractASM(std::string fileName)
    makes names unique */
 void ObjectFile::renameSections(std::string file, std::string id)
 {
-    //TODO: make this general, not specific to this list of
-    //section names
-
     /* create objcopy command */
     std::string cmd = "powerpc-eabi-objcopy";
     cmd += " --rename-section .text=text" + id;
     cmd += " --rename-section .rodata=rodata" + id;
     cmd += " --rename-section .sdata=sdata" + id;
     cmd += " --rename-section .data=data" + id;
+    cmd += " --rename-section .sbss=sbss" + id;
+    cmd += " --rename-section .bss=bss" + id;
     cmd += " --rename-section .gnu.attributes=attr" + id;
     cmd += " " + file;
 
     /* execute command */
     System::runCMD(cmd);
+
+    /* delete comment section */
+    System::runCMD("powerpc-eabi-objcopy -R .comment " + file);
 }
 
 /* returns all section names without '.' */

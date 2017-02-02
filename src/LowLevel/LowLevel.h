@@ -11,6 +11,7 @@
 /* change extension of file name */
 #define CHANGE_EXT(file, ext) (std::string(file).substr(0, std::string(file).find_last_of('.') + 1) + ext)
 
+#include "../ArgumentParsing/Parser.h"
 #include "Section.h"
 
 #include <vector>
@@ -72,14 +73,16 @@ namespace ObjectFile
 namespace Compiler
 {
     /* compile files in directory, using include paths given */
-    FileList compile(FileList&, FileList = FileList());
+    FileList compile(FileList&, TokenList = TokenList(),
+        FileList = FileList());
 }
 
 /* link lists of object files */
 namespace Linker
 {
     /* link all sections, using linker script provided */
-    void link(SectionList&, std::string, std::string);
+    void link(SectionList&, std::string, std::string,
+        std::string, TokenList = TokenList());
 }  
 
 #endif

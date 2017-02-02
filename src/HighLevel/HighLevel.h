@@ -12,8 +12,8 @@ namespace Builder
 
     /* compile files in directory, return list of all object files
        (including files from libraries) */
-    FileList getObjectFiles(FileList, FileList = FileList(),
-        FileList = FileList());
+    FileList getObjectFiles(FileList, TokenList = TokenList(),
+        FileList = FileList(), FileList = FileList());
 
     /* calculate sizes of sections and find allocation in memory */
     SectionList getSectionAddresses(FileList&, Arguments&);
@@ -22,7 +22,7 @@ namespace Builder
     void addStackSetup(SectionList&, Arguments&);
 
     /* link code into final executable */
-    ASMcode getLinkedCode(SectionList&);
+    ASMcode getLinkedCode(SectionList&, Arguments&);
 
     /* add original instruction, overwrite nop line in code */
     void addOriginalInstruction(ASMcode&, Arguments&);
@@ -41,7 +41,7 @@ namespace CodeSections
     void storeNames(SectionList&, FileList&);
 
     /* get sizes of each section */
-    void storeSizes(SectionList&);
+    void storeSizes(SectionList&, std::string);
 }
 
 /* manage memory regions in RAM */
