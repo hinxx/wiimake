@@ -41,6 +41,16 @@ void run(TokenList& tokens)
         INVALID_ARG(tokens.size() != 3, "incorrect number of arguments");
         iso.loadState(tokens.back());
     }
+    else if (tokens[1] == "--zero")
+    {
+        INVALID_ARG(tokens.size() != 4, "incorrect number of arguments");   
+        uint32_t address = stoul(tokens[2], nullptr, 16);
+        uint32_t end = address + stoul(tokens[3], nullptr, 10);
+        for (; address <= end; address++)
+        {
+            iso.write(address, 0, false);
+        }
+    }
     else
     {
         throw std::invalid_argument("invalid option: " + tokens[1]);

@@ -213,3 +213,26 @@ uint64_t ISO::checkSum() const
     return sum;
 }
 
+void ISO::injectDOL(std::string path, uint32_t iso_offset, uint32_t ram_offset)
+{
+    // find start of dol
+    mStartDOL = read(0x0420, false);
+
+    // search dol table
+    uint32_t dol, ram, size;
+    for (uint32_t offset = 0; offset < 0x47; offset += 0x04)
+    {
+        // get section info
+        dol  = read(mStartDOL + offset, false);
+        ram  = read(mStartDOL + offset + 0x48, false);
+        size = read(mStartDOL + offset + 0x90, false);
+
+        // if blank section add new section here
+        if (size == 0)
+        {
+            write(mStartDOL + current, offset, false);
+            write(mStartDOL + current + 0x48, ram, false);
+            write(mStartDOL + current + 0x90, size, false);
+        }
+    }
+}
