@@ -1,8 +1,8 @@
 #include "catch.hpp"
 
 #include "HeaderDisplay.h"
-#include "../src/ISO.h"
-#include "../src/LowLevel/LowLevel.h"
+#include "ISO.h"
+#include "LowLevel.h"
 
 static const std::string path = "../tests/files/ISO/";
 
@@ -36,7 +36,6 @@ TEST_CASE("test all functions in ISO.cpp")
     REQUIRE(iso.read(0x804d4000) == 0x6a6f626a);
     REQUIRE(iso.read(0x804deb00) == 0x40000000);
     REQUIRE(iso.read(0x804dec00) == 0xdeadbabe);
-    REQUIRE(iso.read(0x80191000) == iso.read("80191000"));
     REQUIRE_NOTHROW(iso.read(0x1e800));
 
     /* write value */
@@ -46,36 +45,6 @@ TEST_CASE("test all functions in ISO.cpp")
     /* replace with original code */
     iso.write(0x80006000, 0xc0e10054);
     REQUIRE(iso.read(0x80006000) == 0xc0e10054);
-
-    /* write some unique values */
-    iso.write(0x80003100, 0x1234abcd);
-    iso.write(0x80006000, 0x1234abcd);
-    iso.write(0x803b8000, 0x1234abcd);
-    iso.write(0x804dec00, 0x1234abcd);
-
-    /* save iso */
-    iso.saveState("../tests/files/ISO/save.data");
-
-    /* revert values to original */
-    iso.write(0x80003100, 0x7c0802a6);
-    iso.write(0x80006000, 0xc0e10054);
-    iso.write(0x803b8000, 0xc091999a);
-    iso.write(0x804dec00, 0xdeadbabe);
-
-    /* load iso */
-    iso.loadState("../tests/files/ISO/save.data");
-
-    /* check that values changed */
-    REQUIRE(iso.read(0x80003100) == 0x1234abcd);
-    REQUIRE(iso.read(0x80006000) == 0x1234abcd);
-    REQUIRE(iso.read(0x803b8000) == 0x1234abcd);
-    REQUIRE(iso.read(0x804dec00) == 0x1234abcd);
-
-    /* revert values to original */
-    iso.write(0x80003100, 0x7c0802a6);
-    iso.write(0x80006000, 0xc0e10054);
-    iso.write(0x803b8000, 0xc091999a);
-    iso.write(0x804dec00, 0xdeadbabe);
 
     /* create code */
     ASMcode code;

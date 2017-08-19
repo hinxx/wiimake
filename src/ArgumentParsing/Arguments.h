@@ -12,6 +12,8 @@ struct MemRegion
 {
     uint32_t start, end;
 
+    MemRegion() {}
+
     MemRegion(uint32_t a, uint32_t b) : start(a), end(b)
         {align();}
 
@@ -64,6 +66,18 @@ struct Arguments
 
     /* static overwrites to make */
     std::vector< std::pair<uint32_t, uint32_t> > staticOverwrites;
+
+    /* region in iso to store the dol info */
+    MemRegion isoRegion;
+
+    /* path to dol file that will be merged */
+    std::string dolFile;
+    
+    /* symbol file for fixed symbols in merged dol file */
+    std::string symbolFile;
+
+    /* target RAM region for dol file to be injected */
+    MemRegion ramTarget;
 };
 
 #endif

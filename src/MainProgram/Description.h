@@ -29,13 +29,15 @@ namespace Description
     "\t that is being overwritten at the injection point. The --checksum\n"
     "\t option allows for simple verification of the iso version. There\n"
     "\t is also --save and --load which allow for easy distribution\n"
-    "\t of mods.\n";
+    "\t of mods. Finally, the --zero command allows the user to zero\n"
+    "\t out a specified range of the iso file\n";
 
     const std::string usage = "\nUsage:\n"
     "wiimake ISO CONFIGFILE [--save-temps]\n"
     "wiimake-isotool ISO [--save <file>] [--load <file>]\n"
-    "                    [--read <addr>] [--checksum] \n";
-
+    "                    [--read <addr>] [--zero <addr> <size>]\n"
+    "                    [--checksum]\n";
+ 
     const std::string space = "                            ";
 
     const std::string help = "";

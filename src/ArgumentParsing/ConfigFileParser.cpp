@@ -131,36 +131,53 @@ TokenList values)
 {
     /* find variable name */
     TokenList variables = {"REGIONS", "SOURCES", "LIBRARIES",
-        "INCLUDE_PATHS", "COMPILER_FLAGS", "LINKER_FLAGS",
-        "FIXED_SYMBOLS"};
+        "INCLUDE_PATHS", "COMPILER_FLAGS", "LINKER_FLAGS", "FIXED_SYMBOLS",
+        "ISO_REGION", "DOL_NAME", "SYMBOL_FILE", "RAM_TARGET"};
     
     auto pos = std::find(variables.begin(), variables.end(), name);
+    std::string begin, end;
 
     /* find correct variable, store accordingly */
     switch (std::distance(variables.begin(), pos))
     {
-        case 0:
+        case 0: // REGIONS
             ConfigParser::storeMemRegions(args, values);
             break;
-        case 1:
+        case 1: // SOURCES
             args.sources = values;
             break;
-        case 2:
+        case 2: // LIBRARIES
             args.libs = values;
             break;
-        case 3:
+        case 3: // INCLUDE_PATHS
             args.includePaths = values;
             break;
-        case 4:
+        case 4: // COMPILER_FLAGS
             args.compileFlags = values;
             break;
-        case 5:
+        case 5: // LINKER_FLAGS
             args.linkFlags = values;
             break;
-        case 6:
+        case 6: // FIXED_SYMBOLS
             ConfigParser::storeFixedSymbols(args, values);
             break;
-        default:
+        case 7: // ISO_REGION
+            begin = values[0].substr(0, values[0].find("-"));
+            end = values[0].substr(values[0].find("-") + 1);
+            args.isoRegion = MemRegion(begin, end);
+            break;
+        case 8: // DOL_NAME
+            args.dolFile = values[0];
+            break;
+        case 9: // SYMBOL_FILE
+            args.symbolFile = values[0];
+            break;
+        case 10: // RAM_TARGET
+            begin = values[0].substr(0, values[0].find("-"));
+            end = values[0].substr(values[0].find("-") + 1);
+            args.ramTarget = MemRegion(begin, end);
+            break;
+        default: // Static Overwrite
             ConfigParser::storeStaticOverwrite(args, name, values);
             break;
     }

@@ -1,9 +1,11 @@
-#include "../ArgumentParsing/Parser.h"
-#include "../ISO.h"
-#include "../Global.h"
+#include "Parser.h"
+#include "ISO.h"
+#include "Global.h"
 #include "Description.h"
+#include "md5.h"
 
 #include <iostream>
+#include <stdint.h>
 
 void run(TokenList& tokens)
 {
@@ -14,10 +16,10 @@ void run(TokenList& tokens)
     if (tokens[1] == "--read")
     {
         INVALID_ARG(tokens.size() != 3, "incorrect number of arguments");
-        /* make sure valid address is given */
         try
         {
-            std::cout << std::hex << iso.read(tokens.back()) << std::endl;
+            uint32_t addr = stoul(tokens.back(), nullptr, 16);
+            std::cout << std::hex << iso.read(addr) << std::endl;
         }
         catch (std::invalid_argument& e)
         {
@@ -27,28 +29,20 @@ void run(TokenList& tokens)
             throw e;
         }
     }
-    else if (tokens[1] == "--checksum")
+    else if (tokens[1] == "--md5")
     {
-        std::cout << std::hex << iso.checkSum() << std::endl;
-    }
-    else if (tokens[1] == "--save")
-    {
-        INVALID_ARG(tokens.size() != 3, "incorrect number of arguments");
-        iso.saveState(tokens.back());
-    }
-    else if (tokens[1] == "--load") 
-    {
-        INVALID_ARG(tokens.size() != 3, "incorrect number of arguments");
-        iso.loadState(tokens.back());
+        std::cout << md5(tokens[0]) << std::endl;
     }
     else if (tokens[1] == "--zero")
     {
         INVALID_ARG(tokens.size() != 4, "incorrect number of arguments");   
+
         uint32_t address = stoul(tokens[2], nullptr, 16);
-        uint32_t end = address + stoul(tokens[3], nullptr, 10);
-        for (; address <= end; address++)
+        uint32_t end = address + stoul(tokens[3], nullptr, 16);
+
+        for (; address < end; address += 0x04)
         {
-            iso.write(address, 0, false);
+            iso.write(address, 0);
         }
     }
     else

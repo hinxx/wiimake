@@ -10,17 +10,21 @@ set (CORE_SRCS  ArgumentParsing/CommandLineParser.cpp
                 LowLevel/ObjectFile.cpp
                 LowLevel/SymbolTable.cpp
                 LowLevel/System.cpp
-                ISO.cpp)     
+                BinaryFileHandler/BinaryFile.cpp                
+                BinaryFileHandler/ISO.cpp
+                BinaryFileHandler/DOL.cpp
+                BinaryFileHandler/md5.cpp)
 
 set (CORE_HEADERS ArgumentParsing
                   HighLevel
-                  LowLevel)
+                  LowLevel
+                  BinaryFileHandler)
 
 # add library containing core files
 add_library (core ${CORE_SRCS})
 
 # get directories containing header files in core 
-target_include_directories (core PUBLIC ${CORE_HEADERS})
+target_include_directories (core PUBLIC ${CORE_HEADERS} .)
 
 # add command line programs
 add_executable (wiimake MainProgram/wiimake.cpp)

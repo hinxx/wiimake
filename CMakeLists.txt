@@ -12,9 +12,9 @@ set(CMAKE_EXE_LINKER_FLAGS "-static")
 project (WiiMake)
 
 # project version
-set (WiiMake_VERSION_MAJOR 1)
-set (WiiMake_VERSION_MINOR 3)
-set (WiiMake_VERSION_REVISION 5)
+set (WiiMake_VERSION_MAJOR 2)
+set (WiiMake_VERSION_MINOR 0)
+set (WiiMake_VERSION_REVISION 0)
 
 # create header for version number
 configure_file (

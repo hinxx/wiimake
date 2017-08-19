@@ -2,7 +2,7 @@
 #define HIGH_LEVEL_H
 
 #include "../ArgumentParsing/Arguments.h"
-#include "../Global.h"
+#include "Global.h"
 
 /* section in object file */
 struct Section
