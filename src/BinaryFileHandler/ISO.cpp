@@ -39,6 +39,9 @@ void ISO::mergeDOL(DOL& dol, uint32_t region_start, uint32_t region_end)
     // store code in DOL
     dol.getSectionCode();
 
+    // find start of DOL
+    uint32_t dol_start = read(0x0420);
+
     // keep track of current position in iso file
     uint32_t file_pos = region_start;
 
@@ -53,7 +56,7 @@ void ISO::mergeDOL(DOL& dol, uint32_t region_start, uint32_t region_end)
     // write each section of DOL file
     for (auto& dol_section : all_dol_sections)
     {
-        // find available section in iso
+        // find first available data section in iso
         unsigned i = 0;
         while (dol_table.table[i].size > 0)
         {
@@ -70,7 +73,7 @@ void ISO::mergeDOL(DOL& dol, uint32_t region_start, uint32_t region_end)
 
         // write new dol section
         uint32_t table_start = read(0x0420);
-        write(table_start + 0x04 * i, dol_table.table[i].offset);
+        write(table_start + 0x04 * i, dol_table.table[i].offset - dol_start);
         write(table_start + 0x04 * i + 0x48, dol_table.table[i].start_address);
         write(table_start + 0x04 * i + 0x90, dol_table.table[i].size);
 
