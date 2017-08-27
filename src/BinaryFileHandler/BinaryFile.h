@@ -74,8 +74,11 @@ private:
 
 public:
 
+    // file position of the dol start
+    uint32_t mDolStart;
+
     // table outlining DOL structure
-    DolTable dol_table;
+    DolTable mDolInfo;
 
     // constructor from file path
     BinaryFile(std::string);
@@ -83,13 +86,14 @@ public:
     // destructor - close file stream
     ~BinaryFile();
 
-    // populate dol table with values from file starting at offset
-    void populateDolTable(uint32_t);
+    // populate dol table with values from file
+    void populateDolTable();
 
+    // store code from sections in dol table
     void getSectionCode();
 
-    // find DOL offset corresponding to RAM address
-    uint32_t dolOffset(uint32_t) const;
+    // find file offset corresponding to RAM address (look up in dol table)
+    uint32_t fileOffset(uint32_t) const;
 
     // read from file offset
     uint32_t read(uint32_t) const;

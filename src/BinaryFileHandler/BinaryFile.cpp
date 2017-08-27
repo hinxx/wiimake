@@ -22,12 +22,11 @@ BinaryFile::~BinaryFile()
     delete mFile;
 }
 
-// populate dol table with values from file starting at offset
-void BinaryFile::populateDolTable(uint32_t offset)
+// populate dol table with values from file
+void BinaryFile::populateDolTable()
 {
     // get text and data sections
-    uint32_t end = offset + 0x47;
-    for (; offset < end; offset += 0x04)
+    for (uint32_t offset = mDolStart; offset < mDolStart + 0x47; offset += 0x04)
     {
         // create section and get values from file
         DolSection section;
@@ -36,31 +35,31 @@ void BinaryFile::populateDolTable(uint32_t offset)
         section.size = read(offset + 0x90);
 
         // add to table
-        dol_table.table.push_back(section); 
+        mDolInfo.table.push_back(section); 
     }
-    RUNTIME_ERROR(dol_table.table.size() != 18, "invalid DOL table");
+    RUNTIME_ERROR(mDolInfo.table.size() != 18, "invalid DOL table");
 
     // get bss and entry point info
-    dol_table.bss_address = read(end - 0x47 + 0xd8);
-    dol_table.bss_size = read(end - 0x47 + 0xdc);
-    dol_table.entry_point = read(end - 0x47 + 0xe0);
+    mDolInfo.bss_address = read(mDolStart + 0xd8);
+    mDolInfo.bss_size = read(mDolStart + 0xdc);
+    mDolInfo.entry_point = read(mDolStart + 0xe0);
 }
 
 void BinaryFile::getSectionCode()
 {
-    for (auto& section : dol_table.table)
+    for (auto& section : mDolInfo.table)
     {
-        uint32_t addr = section.offset;
-        for (; addr < section.offset + section.size; addr += 0x04)
-            section.code.push_back(read(addr));
+        uint32_t offset = section.offset;
+        for (; offset < section.offset + section.size; offset += 0x04)
+            section.code.push_back(read(offset + mDolStart));
     }
-}    
+}
 
-// find DOL offset corresponding to RAM address
-uint32_t BinaryFile::dolOffset(uint32_t address) const
+// find file offset corresponding to RAM address (look up in dol table)
+uint32_t BinaryFile::fileOffset(uint32_t address) const
 {
     // find section that contains this address
-    auto section = std::find_if(dol_table.table.begin(), dol_table.table.end(),
+    auto section = std::find_if(mDolInfo.table.begin(), mDolInfo.table.end(),
         [&](const DolSection& dolSection)
         {
             return address >= dolSection.start_address &&
@@ -68,10 +67,10 @@ uint32_t BinaryFile::dolOffset(uint32_t address) const
         });
 
     // address wasn't found
-    RUNTIME_ERROR(section == dol_table.table.end(), "address not found in dol table");
+    RUNTIME_ERROR(section == mDolInfo.table.end(), "address not found in dol table");
 
     // return offset
-    return section->offset + address - section->start_address;
+    return address - section->start_address + section->offset + mDolStart;
 }
 
 // big endian 32-bit read from file offset

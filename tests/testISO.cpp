@@ -20,53 +20,48 @@ TEST_CASE("test all functions in ISO.cpp")
     ISO iso(path + "test.iso");
 
     /* check DOL offset calculations */
-    REQUIRE(iso.dolOffset(0x80003150) == 0x1e950);
-    REQUIRE(iso.dolOffset(0x80005570) == 0x3d2670);
-    REQUIRE(iso.dolOffset(0x80005950) == 0x20d30);
-    REQUIRE(iso.dolOffset(0x803b7290) == 0x3d2a90);
-    REQUIRE(iso.dolOffset(0x804d79f0) == 0x44fbd0);
+    REQUIRE(iso.fileOffset(0x80003150) == 0x1e950);
+    REQUIRE(iso.fileOffset(0x80005570) == 0x3d2670);
+    REQUIRE(iso.fileOffset(0x80005950) == 0x20d30);
+    REQUIRE(iso.fileOffset(0x803b7290) == 0x3d2a90);
+    REQUIRE(iso.fileOffset(0x804d79f0) == 0x44fbd0);
 
     /** test iso read **/
-    REQUIRE(iso.read(0x80003100) == 0x7c0802a6);
-    REQUIRE(iso.read(0x80003150) == 0x41820018);
-    REQUIRE(iso.read(0x80005570) == 0x20080000);
-    REQUIRE(iso.read(0x800056e0) == 0x80005530);
-    REQUIRE(iso.read(0x80006000) == 0xc0e10054);
-    REQUIRE(iso.read(0x803b8000) == 0xc091999a);
-    REQUIRE(iso.read(0x804d4000) == 0x6a6f626a);
-    REQUIRE(iso.read(0x804deb00) == 0x40000000);
-    REQUIRE(iso.read(0x804dec00) == 0xdeadbabe);
-    REQUIRE_NOTHROW(iso.read(0x1e800));
+    REQUIRE(iso.read(iso.fileOffset(0x80003100)) == 0x7c0802a6);
+    REQUIRE(iso.read(iso.fileOffset(0x80003150)) == 0x41820018);
+    REQUIRE(iso.read(iso.fileOffset(0x80005570)) == 0x20080000);
+    REQUIRE(iso.read(iso.fileOffset(0x800056e0)) == 0x80005530);
+    REQUIRE(iso.read(iso.fileOffset(0x80006000)) == 0xc0e10054);
+    REQUIRE(iso.read(iso.fileOffset(0x803b8000)) == 0xc091999a);
+    REQUIRE(iso.read(iso.fileOffset(0x804d4000)) == 0x6a6f626a);
+    REQUIRE(iso.read(iso.fileOffset(0x804deb00)) == 0x40000000);
 
     /* write value */
-    iso.write(0x80006000, 0x1234abcd);
-    REQUIRE(iso.read(0x80006000) == 0x1234abcd);
+    iso.write(iso.fileOffset(0x80006000), 0x1234abcd);
+    REQUIRE(iso.read(iso.fileOffset(0x80006000)) == 0x1234abcd);
 
     /* replace with original code */
-    iso.write(0x80006000, 0xc0e10054);
-    REQUIRE(iso.read(0x80006000) == 0xc0e10054);
+    iso.write(iso.fileOffset(0x80006000), 0xc0e10054);
+    REQUIRE(iso.read(iso.fileOffset(0x80006000)) == 0xc0e10054);
 
     /* create code */
     ASMcode code;
     code.push_back(std::make_pair(0x80003100, 0x1234abcd));
     code.push_back(std::make_pair(0x80006000, 0x1234abcd));
     code.push_back(std::make_pair(0x803b8000, 0x1234abcd));
-    code.push_back(std::make_pair(0x804dec00, 0x1234abcd));
 
     /* inject code */
     iso.injectCode(code);
         
     /* check that values changed */
-    REQUIRE(iso.read(0x80003100) == 0x1234abcd);
-    REQUIRE(iso.read(0x80006000) == 0x1234abcd);
-    REQUIRE(iso.read(0x803b8000) == 0x1234abcd);
-    REQUIRE(iso.read(0x804dec00) == 0x1234abcd);
+    REQUIRE(iso.read(iso.fileOffset(0x80003100)) == 0x1234abcd);
+    REQUIRE(iso.read(iso.fileOffset(0x80006000)) == 0x1234abcd);
+    REQUIRE(iso.read(iso.fileOffset(0x803b8000)) == 0x1234abcd);
 
     /* revert values to original */
-    iso.write(0x80003100, 0x7c0802a6);
-    iso.write(0x80006000, 0xc0e10054);
-    iso.write(0x803b8000, 0xc091999a);
-    iso.write(0x804dec00, 0xdeadbabe);
+    iso.write(iso.fileOffset(0x80003100), 0x7c0802a6);
+    iso.write(iso.fileOffset(0x80006000), 0xc0e10054);
+    iso.write(iso.fileOffset(0x803b8000), 0xc091999a);
 }
 
     

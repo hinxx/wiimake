@@ -17,10 +17,10 @@ ISO::ISO(std::string path) : BinaryFile(path)
         "not valid Wii/Gamecube ISO");
 
     // find start of DOL
-    uint32_t dol_start = read(0x0420);
+    mDolStart = read(0x0420);
 
     // populate dol table
-    populateDolTable(dol_start);
+    populateDolTable();
 }
 
 // inject code into iso
@@ -29,7 +29,7 @@ void ISO::injectCode(const std::vector< std::pair<uint32_t, uint32_t> >& code)
     // loop through code and write each (address, value) pair
     for (auto& line : code)
     {
-        write(dolOffset(line.first), line.second);
+        write(fileOffset(line.first), line.second);
     }
 }
 
@@ -39,17 +39,14 @@ void ISO::mergeDOL(DOL& dol, uint32_t region_start, uint32_t region_end)
     // store code in DOL
     dol.getSectionCode();
 
-    // find start of DOL
-    uint32_t dol_start = read(0x0420);
-
     // keep track of current position in iso file
     uint32_t file_pos = region_start;
 
     // create temporary vector of sections
-    std::vector<DolSection> all_dol_sections = dol.dol_table.table;
+    std::vector<DolSection> all_dol_sections = dol.mDolInfo.table;
 
     // add dummy section for the bss
-    DolSection bss (0, dol.dol_table.bss_address, dol.dol_table.bss_size);
+    DolSection bss (0, dol.mDolInfo.bss_address, dol.mDolInfo.bss_size);
     bss.code = std::vector<uint32_t>(bss.size / 4, 0);
     all_dol_sections.push_back(bss);
 
@@ -58,24 +55,23 @@ void ISO::mergeDOL(DOL& dol, uint32_t region_start, uint32_t region_end)
     {
         // find first available data section in iso
         unsigned i = 0;
-        while (dol_table.table[i].size > 0)
+        while (mDolInfo.table[i].size > 0)
         {
             ++i;
         }
 
         // copy over section information
-        dol_table.table[i].start_address = dol_section.start_address;
-        dol_table.table[i].size = dol_section.size;
-        dol_table.table[i].code = dol_section.code;
+        mDolInfo.table[i].start_address = dol_section.start_address;
+        mDolInfo.table[i].size = dol_section.size;
+        mDolInfo.table[i].code = dol_section.code;
 
         // put this section at current position in file
-        dol_table.table[i].offset = file_pos;
+        mDolInfo.table[i].offset = file_pos - mDolStart;
 
         // write new dol section
-        uint32_t table_start = read(0x0420);
-        write(table_start + 0x04 * i, dol_table.table[i].offset - dol_start);
-        write(table_start + 0x04 * i + 0x48, dol_table.table[i].start_address);
-        write(table_start + 0x04 * i + 0x90, dol_table.table[i].size);
+        write(mDolStart + 0x04 * i + 0x00, mDolInfo.table[i].offset);
+        write(mDolStart + 0x04 * i + 0x48, mDolInfo.table[i].start_address);
+        write(mDolStart + 0x04 * i + 0x90, mDolInfo.table[i].size);
 
         // write code to file
         for (auto& instruction : dol_section.code)
